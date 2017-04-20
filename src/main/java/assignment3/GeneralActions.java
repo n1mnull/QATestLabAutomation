@@ -55,13 +55,18 @@ public class GeneralActions {
     driver.findElement(this.nameField).sendKeys(categoryName);
     driver.findElement(this.saveButton).click();
 
-    waitForContentLoad(sortField);
-    driver.findElement(this.sortField).sendKeys(categoryName);
-    driver.findElement(this.sortButton).click();
+    try {
+      driver.findElement(By.xpath("//div[@class='alert alert-success']"));
+      System.out.println(categoryName + " is create in Categories");
+    } catch (NoSuchElementException e) {
+      System.out.println(categoryName + " isn`t create in Categories");
+    }
   }
 
   public void checkCategory(String categoryName) {
     waitForContentLoad(sortField);
+    driver.findElement(this.sortField).sendKeys(categoryName);
+    driver.findElement(this.sortButton).click();
     try {
       driver.findElement(By.className("list-empty"));
       System.out.println(categoryName + " isn`t exist in Categories");

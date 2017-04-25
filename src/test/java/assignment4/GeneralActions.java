@@ -101,10 +101,8 @@ public class GeneralActions {
           .findElement(By.xpath("//ul[@class='page-list clearfix text-xs-center']"))
           .findElements(By.className("js-search-link"));
       listProducts = driver.findElements(By.xpath("//h1[@class='h3 product-title']"));
-      System.out.println(listProducts.size());
 
       for (int j = 0; j < listProducts.size(); j++) {
-        System.out.println(listProducts.get(j).getText() + " - " + product.getName());
         if (product.getName().equals(listProducts.get(j).getText())) {
           checkProduct = listProducts.get(j);
           break;
@@ -128,17 +126,14 @@ public class GeneralActions {
     waitForContentLoad(By.xpath("//div[@class='product-information']"));
 
     String checkName = driver.findElement(By.xpath("//*[@id='wrapper']/div/nav/ol/li[2]/a/span")).getText();
-    System.out.println(checkName + " compare with " + product.getName());
     Assert.assertEquals(checkName, product.getName(), "Product has another name");
 
     String checkPrice = driver.findElement(By.xpath("//div[@class='current-price']")).getText();
     checkPrice = checkPrice.substring(0, checkPrice.indexOf(" "));
-    System.out.println(checkPrice + " compare with " + product.getPrice());
     Assert.assertEquals(checkPrice, product.getPrice(), "Product has another price");
 
     String checkQty = driver.findElement(By.cssSelector("#product-details > div.product-quantities > span")).getText();
     checkQty = checkQty.substring(0,checkQty.indexOf(" "));
-    System.out.println(checkQty + " compare with " + product.getQty());
     Assert.assertEquals(checkQty, product.getQty().toString(), "Product has another qty");
   }
 

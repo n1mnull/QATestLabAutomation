@@ -1,0 +1,26 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Products Management" verbose="1">
+    <test name="Create New Product [Chrome]">
+    <parameter name="browser" value="chrome"/>
+        <!--configure test to execute testing script using Chrome browser-->
+        <classes>
+            <class name="assignment4.tests.CreateProductTest"/>
+        </classes>
+    </test>
+
+    Prepare test for firefox and IE browsers
+    <test name="Create New Product [IE]">
+        <parameter name="browser" value="ie"/>
+        <classes>
+            <class name="assignment4.tests.CreateProductTest"/>
+        </classes>
+    </test>
+
+    <test name="Create New Product [Firefox]">
+        <parameter name="browser" value="firefox"/>
+        <classes>
+            <class name="assignment4.tests.CreateProductTest"/>
+        </classes>
+    </test>
+</suite>

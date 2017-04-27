@@ -53,7 +53,6 @@ public class DriverFactory {
    * @return New instance of {@link RemoteWebDriver} object.
    */
   public static WebDriver initDriver(String browser, String gridUrl) {
-    System.out.println("initDriver begin + grid " + browser + "; " + gridUrl);
     WebDriver driver;
     try {
       driver = new RemoteWebDriver(new URL(gridUrl), switchDesiredCapabilities(browser));
@@ -61,7 +60,6 @@ public class DriverFactory {
       e.printStackTrace();
       throw new SkipException("Unable to create RemoteWebDriver instance");
     }
-    System.out.println("initDriver end + grid " + browser + "; " + gridUrl);
     return driver;
   }
 

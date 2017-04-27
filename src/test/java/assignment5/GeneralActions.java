@@ -23,7 +23,6 @@ public class GeneralActions {
   private WebDriver driver;
   private WebDriverWait wait;
 
-  private By allProductsLink = By.xpath("//a[@class='all-product-link pull-xs-left pull-md-right h4']");
 
   public GeneralActions(WebDriver driver) {
     this.driver = driver;
@@ -35,17 +34,17 @@ public class GeneralActions {
     waitForContentLoad(By.id("main"));
   }
 
-  public void openRandomProduct() {
+  public String openRandomProduct() {
     CustomReporter.log("Start method openRandomProduct");
-    waitForContentLoad(this.allProductsLink);
-    driver.findElement(allProductsLink).click();
-
+    driver.findElement(By.xpath("//a[@class='all-product-link pull-xs-left pull-md-right h4']")).click();
+    waitForContentLoad(By.xpath("//h1[@class='h3 product-title']"));
     List<WebElement> listProducts = driver.findElements(By.xpath("//h1[@class='h3 product-title']"));
     Random random = (new Random());
     int randomInt = random.nextInt(listProducts.size());
     System.out.println(randomInt + " " + listProducts.get(randomInt).getText());
     listProducts.get(randomInt).click();
     waitForContentLoad(By.id("product"));
+    return driver.getCurrentUrl();
   }
 
   /**
@@ -58,16 +57,19 @@ public class GeneralActions {
     String priceStr = driver.findElement(By.xpath("//div[@class='current-price']")).getText().replace(',', '.');
     float price = Float.valueOf(priceStr.substring(0, priceStr.indexOf(" ")));
     System.out.println(name + " " + qty + " " + price);
-    ProductData product = new ProductData(name,qty,price);
+    ProductData product = new ProductData(name, qty, price);
     return product;
   }
 
   public int getQtyProduct(String url) {
-//    driver.get(url);
+    if (!driver.getCurrentUrl().equals(url)) {
+      driver.get(url);
+    }
+    waitForContentLoad(By.xpath("//a[text()='Подробнее о товаре']"));
     driver.findElement(By.xpath("//a[text()='Подробнее о товаре']")).click();
     waitForContentLoad(By.cssSelector("#product-details > div.product-quantities > span"));
     String qtyStr = driver.findElement(By.cssSelector("#product-details > div.product-quantities > span")).getText();
-    return Integer.parseInt(qtyStr.substring(0,qtyStr.indexOf(" ")));
+    return Integer.parseInt(qtyStr.substring(0, qtyStr.indexOf(" ")));
   }
 
   public void addProductToCart() {
@@ -80,25 +82,23 @@ public class GeneralActions {
   }
 
   public void validateProductInformation(ProductData product) {
-    String name = driver.findElement(By.cssSelector("div.product-line-info > a")).getText();
-    System.out.println(name);
-    Assert.assertTrue(name.toUpperCase().equals(product.getName()),"Other product in the Cart");
+    waitForContentLoad(By.xpath("//a[@class='label']"));
+    String name = driver.findElement(By.xpath("//a[@class='label']")).getText();
+    Assert.assertTrue(name.toUpperCase().equals(product.getName()), "Other product in the Cart");
 
     String priceStr = driver.findElement(By.cssSelector("div.cart-summary-line.cart-total > span.value")).getText();
-    System.out.println(priceStr);
     float price = Float.valueOf(priceStr.substring(0, priceStr.indexOf(" ")).replace(',', '.'));
-    System.out.println(price);
     Assert.assertTrue(price == product.getPrice(), "Price is not equals with Product");
 
     String qty = driver.findElement(By.cssSelector("#cart-subtotal-products > span.label.js-subtotal")).getText();
-    System.out.println(qty);
     Assert.assertTrue(qty.equals("1 шт."));
   }
 
   public void proceedOrder() {
-    driver.findElement(By.className("checkout cart-detailed-actions card-block"));
-    waitForContentLoad(By.className("step-title h3"));
+    driver.findElement(By.xpath("//a[@class='btn btn-primary']")).click();
+    waitForContentLoad(By.id("checkout-personal-information-step"));
     driver.findElement(By.xpath("//input[@name='firstname']")).sendKeys("Ivan");
+//    driver.findElement(By.xpath("//input[@class='form-control']")).sendKeys("Ivan");
     driver.findElement(By.xpath("//input[@name='lastname']")).sendKeys("Poddubny");
     Random random = (new Random());
 
@@ -118,7 +118,28 @@ public class GeneralActions {
     driver.findElement(By.id("conditions_to_approve[terms-and-conditions]")).click();
     driver.findElement(By.cssSelector("#payment-confirmation button[type=submit]")).click();
 
+  }
 
+  public void validateOrderSummary(ProductData product) {
+    waitForContentLoad(By.id("content-wrapper"));
+    String confirmString = driver.findElement(By.xpath("//h3[@class='h1 card-title']")).getText();
+    Assert.assertTrue(confirmString.toLowerCase().contains("ваш заказ подтверждён"), "Order is not confirmed");
+
+    String name = driver.findElement(By.xpath("//div[@class='col-sm-4 col-xs-9 details']")).getText();
+    Assert.assertTrue(name.toUpperCase().contains(product.getName()), "Other product in the Order");
+
+    String priceStr = driver.findElement(By.xpath("//div[@class='col-xs-5 text-sm-right text-xs-left']")).getText();
+    float price = Float.valueOf(priceStr.substring(0, priceStr.indexOf(" ")).replace(',', '.'));
+    Assert.assertTrue(price == product.getPrice(), "Order price in is not equals product price");
+
+    String qty = driver.findElement(By.xpath("//div[@class='col-xs-2']")).getText();
+    Assert.assertTrue(qty.equals("1"));
+  }
+
+  public void checkDecrementStock(String url, ProductData product) {
+    int newQty = getQtyProduct(url);
+    System.out.println(newQty + " " + product.getQty());
+    Assert.assertTrue((newQty + 1) == product.getQty(), "Qty not decrement by 1");
   }
 
   /**
@@ -127,5 +148,6 @@ public class GeneralActions {
   public void waitForContentLoad(By by) {
     wait.until(ExpectedConditions.visibilityOfElementLocated(by));
   }
+
 
 }
